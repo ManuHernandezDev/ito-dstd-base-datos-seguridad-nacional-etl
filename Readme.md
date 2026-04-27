@@ -46,7 +46,7 @@ Los datos transformados se inyectaron en un servidor local de **PostgreSQL** med
 - `tabla_delitos_propia`
 - `tabla_delitos_externa`
 - `vista_delitos_combinada` (Resultado de la unión técnica).
-
+- 
 ---
 
 ## 4. Instrucciones de Ejecución
