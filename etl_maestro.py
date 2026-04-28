@@ -51,6 +51,10 @@ def ejecutar_etl_completo():
     df_combinada.to_sql('vista_delitos_combinada', engine, if_exists='replace', index=False)
     
     print("EXITO! ETL Finalizado. Las bases estan listas en PostgreSQL.")
+    # Exportar la tabla final combinada para usarla en Looker Studio o cualquier otro software
+    print("Exportando tabla final para el equipo...")
+    df_combinada.to_csv('base_final_para_looker.csv', index=False, encoding='utf-8')
+    print("¡Archivo 'base_final_para_looker.csv' creado con éxito!")
 
 if __name__ == "__main__":
     ejecutar_etl_completo()
