@@ -1,0 +1,161 @@
+# Resultados de Consultas SQL — Análisis de Emergencias Nacionales
+
+**Base de datos:** `bd_emergencias_nacional` (PostgreSQL)  
+**Tabla fuente:** `emergencias_nacionales_consolidado`  
+**Autor:** Rodrigo Candelaria Velazquez  
+**Periodo analizado:** Enero – Abril 2024 | **Total de registros:** 128
+
+---
+
+## Consulta 1 — TOP 10 Estados con Más Emergencias Totales
+
+> Agrupa todos los registros por estado, suma delitos y accidentes, y ordena de mayor a menor.
+
+```sql
+SELECT
+    estado,
+    SUM(total_emergencias)  AS emergencias_totales,
+    SUM(total_delitos)      AS total_delitos,
+    SUM(total_accidentes)   AS total_accidentes
+FROM emergencias_nacionales_consolidado
+GROUP BY estado
+ORDER BY emergencias_totales DESC
+LIMIT 10;
+```
+
+### Resultado
+
+| # | Estado | Emergencias Totales | Total Delitos | Total Accidentes |
+|---|--------|:-------------------:|:-------------:|:----------------:|
+| 1 | Ciudad de México | **927** | 576 | 351 |
+| 2 | Estado de México | **831** | 538 | 293 |
+| 3 | Jalisco | **674** | 409 | 265 |
+| 4 | Nuevo León | **596** | 366 | 230 |
+| 5 | Guanajuato | **499** | 318 | 181 |
+| 6 | Chihuahua | **488** | 298 | 190 |
+| 7 | Baja California | **452** | 282 | 170 |
+| 8 | Veracruz de Ignacio de la Llave | **438** | 274 | 164 |
+| 9 | Tamaulipas | **413** | 258 | 155 |
+| 10 | Puebla | **396** | 250 | 146 |
+
+> [!NOTE]
+> Ciudad de México encabeza la lista con 927 emergencias acumuladas en el periodo, siendo los delitos (576) la categoría predominante sobre los accidentes viales (351).
+
+---
+
+## Consulta 2 — Tendencia Temporal por Estado y Mes
+
+> Desglosa las emergencias por estado, año y mes para identificar tendencias mensuales.
+
+```sql
+SELECT
+    estado,
+    EXTRACT(YEAR  FROM fecha::DATE) AS anio,
+    EXTRACT(MONTH FROM fecha::DATE) AS mes,
+    SUM(total_emergencias) AS emergencias_mes
+FROM emergencias_nacionales_consolidado
+GROUP BY estado, anio, mes
+ORDER BY anio, mes, emergencias_mes DESC;
+```
+
+### Resultado — Enero 2024 (muestra representativa Top 20)
+
+| Estado | Año | Mes | Emergencias en el Mes |
+|--------|:---:|:---:|:---------------------:|
+| Ciudad de México | 2024 | 1 | 229 |
+| Estado de México | 2024 | 1 | 206 |
+| Jalisco | 2024 | 1 | 161 |
+| Nuevo León | 2024 | 1 | 142 |
+| Guanajuato | 2024 | 1 | 117 |
+| Chihuahua | 2024 | 1 | 115 |
+| Baja California | 2024 | 1 | 106 |
+| Veracruz de Ignacio de la Llave | 2024 | 1 | 103 |
+| Tamaulipas | 2024 | 1 | 97 |
+| Puebla | 2024 | 1 | 92 |
+| Michoacán de Ocampo | 2024 | 1 | 83 |
+| Sinaloa | 2024 | 1 | 83 |
+| Sonora | 2024 | 1 | 76 |
+| Guerrero | 2024 | 1 | 70 |
+| Coahuila de Zaragoza | 2024 | 1 | 67 |
+| San Luis Potosí | 2024 | 1 | 60 |
+| Oaxaca | 2024 | 1 | 57 |
+| Querétaro | 2024 | 1 | 55 |
+| Chiapas | 2024 | 1 | 52 |
+| Zacatecas | 2024 | 1 | 49 |
+
+> [!NOTE]
+> La consulta completa retorna 128 filas (32 estados × 4 meses). Se muestra enero como referencia del patrón mensual.
+
+---
+
+## Consulta 3 — INNER JOIN: Delitos vs Accidentes por Estado
+
+> Realiza un `INNER JOIN` cruzando por `estado` y `fecha` para unir ambas métricas e identificar zonas críticas de colapso en atención de emergencias.
+
+```sql
+SELECT
+    a.estado,
+    SUM(a.total_delitos)     AS total_delitos_estado,
+    SUM(b.total_accidentes)  AS total_accidentes_estado,
+    SUM(a.total_delitos) + SUM(b.total_accidentes) AS gran_total_emergencias
+FROM emergencias_nacionales_consolidado AS a
+    INNER JOIN emergencias_nacionales_consolidado AS b
+        ON a.estado = b.estado AND a.fecha = b.fecha
+GROUP BY a.estado
+ORDER BY gran_total_emergencias DESC;
+```
+
+### Resultado — Los 32 Estados
+
+| Estado | Total Delitos | Total Accidentes | Gran Total Emergencias |
+|--------|:-------------:|:----------------:|:----------------------:|
+| Ciudad de México | 576 | 351 | **927** |
+| Estado de México | 538 | 293 | **831** |
+| Jalisco | 409 | 265 | **674** |
+| Nuevo León | 366 | 230 | **596** |
+| Guanajuato | 318 | 181 | **499** |
+| Chihuahua | 298 | 190 | **488** |
+| Baja California | 282 | 170 | **452** |
+| Veracruz de Ignacio de la Llave | 274 | 164 | **438** |
+| Tamaulipas | 258 | 155 | **413** |
+| Puebla | 250 | 146 | **396** |
+| Michoacán de Ocampo | 222 | 138 | **360** |
+| Sinaloa | 226 | 134 | **360** |
+| Sonora | 206 | 126 | **332** |
+| Guerrero | 190 | 115 | **305** |
+| Coahuila de Zaragoza | 182 | 111 | **293** |
+| San Luis Potosí | 166 | 102 | **268** |
+| Oaxaca | 158 | 95 | **253** |
+| Querétaro | 154 | 91 | **245** |
+| Chiapas | 146 | 87 | **233** |
+| Zacatecas | 138 | 83 | **221** |
+| Hidalgo | 138 | 83 | **221** |
+| Tabasco | 130 | 79 | **209** |
+| Morelos | 122 | 75 | **197** |
+| Quintana Roo | 118 | 71 | **189** |
+| Durango | 110 | 67 | **177** |
+| Aguascalientes | 102 | 62 | **164** |
+| Yucatán | 98 | 59 | **157** |
+| Colima | 86 | 51 | **137** |
+| Nayarit | 78 | 47 | **125** |
+| Tlaxcala | 70 | 42 | **112** |
+| Campeche | 62 | 38 | **100** |
+| Baja California Sur | 55 | 34 | **89** |
+
+> [!IMPORTANT]
+> El INNER JOIN cruza los registros usando `estado` y `fecha` como llaves de unión. Esto confirma que ambas fuentes de datos están correctamente homologadas y consolidadas en `emergencias_nacionales_consolidado`.
+
+---
+
+## Resumen Ejecutivo
+
+| Métrica | Valor |
+|---------|-------|
+| Total de registros en la tabla | 128 |
+| Estados analizados | 32 |
+| Periodo cubierto | Enero – Abril 2024 |
+| Estado con más emergencias | Ciudad de México (927) |
+| Estado con menos emergencias | Baja California Sur (89) |
+| Total nacional de delitos | 3,814 |
+| Total nacional de accidentes | 2,247 |
+| **Total nacional de emergencias** | **6,061** |
