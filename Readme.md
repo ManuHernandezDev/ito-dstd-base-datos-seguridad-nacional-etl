@@ -1,4 +1,4 @@
-# Guía de Ejecución: Sistema ETL y Visualización de Seguridad Nacional
+# Guía de Ejecución y Sistema ETL: Consolidación de Emergencias Nacionales
 
 Este documento detalla el proceso técnico para la implementación del flujo **ETL (Extract, Transform, Load)** y la posterior analítica de datos mediante **Business Intelligence**. El proyecto integra bases de datos masivas del sector público con registros de autoría propia para simular un entorno de inteligencia de seguridad.
 
@@ -16,75 +16,37 @@ Este documento detalla el proceso técnico para la implementación del flujo **E
 
 ---
 
-## 2. Descripción de las Fuentes de Datos
+## Descripción del Proyecto
 
-Para cumplir con el requisito de volumen, se procesaron un total de **238,630 registros**:
+Este repositorio contiene el pipeline ETL (Extract, Transform, Load) desarrollado en Python para cruzar registros masivos de Delitos a nivel nacional con la base de datos de Accidentes de Tránsito en Zonas Urbanas y Suburbanas (ATUS) de INEGI.
 
-1.  **Base Externa (`carpetasFGJ_2024.csv`)**: 138,630 registros de la Fiscalía General de Justicia de la CDMX.
-2.  **Base Propia (`datos_delictivos_no_normalizados.csv`)**: 100,000 registros estructurados por el equipo para el análisis de perfiles delictivos.
+El objetivo es suministrar un datamart consolidado a herramientas de Business Intelligence (Power BI/Looker) para identificar los estados y fechas con mayores colapsos en la atención de emergencias del 911.
 
----
+## Requisitos de Entorno
 
-## 3. Arquitectura del Proceso ETL
+- Python 3.8 o superior.
+- Servidor local de PostgreSQL.
+- Librerías: `pandas`, `sqlalchemy`, `psycopg2-binary`.
 
-### Fase 1: Extracción (Extract)
+## Instrucciones de Ejecución (Para el Equipo)
 
-Se utilizó la librería **Pandas** de Python para la lectura de archivos planos (CSV). Esta fase garantiza la ingesta masiva de datos que superan los 20,000 registros solicitados.
+1. Clonar este repositorio en su máquina local.
+2. Asegurarse de tener en la raíz los archivos originales (`datos_delictivos_no_normalizados.csv` y `atus_anual_2024.csv`).
+3. Crear una base de datos vacía en pgAdmin llamada `bd_emergencias_nacional`.
+4. Abrir `etl_emergencias.py`, modificar las credenciales de conexión (`USUARIO` y `CONTRASENA`) según su configuración local.
+5. Ejecutar el script:
+   ```bash
+   python etl_emergencias.py
+   ```
+6. El script realizará la transformación de catálogos INEGI, ejecutará el cruce y creará la tabla `emergencias_nacionales_consolidado` en PostgreSQL. Además, generará el archivo físico `base_emergencias_limpia.csv` para uso en la fase de visualización.
 
-### Fase 2: Transformación (Transform)
+## Texto para reporte
 
-Se realizaron las siguientes operaciones mediante programación:
+**2. Fase de Extracción y Transformación Programada**
+Para el desarrollo de este proyecto, se implementó un script en Python utilizando la librería `pandas` para procesar de forma masiva dos fuentes de datos independientes.
 
-- **Normalización**: Conversión de encabezados a minúsculas y eliminación de espacios en blanco.
-- **Limpieza**: Formateo de columnas temporales (`datetime`).
-- **Unión (Merge)**: Se ejecutó un **Inner Join** entre ambas bases de datos utilizando la columna `fecha` como llave primaria de cruce. Esto permite correlacionar la incidencia delictiva externa con los registros operativos del equipo.
+**Reglas de Negocio Aplicadas (Limpieza):**
+El principal reto de la transformación fue lograr el cruce (JOIN) entre la base operativa de delitos y la base de Accidentes Viales (ATUS). La base ATUS presentaba la entidad federativa codificada en un catálogo numérico (ID_ENTIDAD del 01 al 32) y las fechas desglosadas en múltiples columnas (Año, Mes, Día).
 
-### Fase 3: Carga (Load)
-
-Los datos transformados se inyectaron en un servidor local de **PostgreSQL** mediante el motor `SQLAlchemy`. Se generaron tres tablas principales:
-
-- `tabla_delitos_propia`
-- `tabla_delitos_externa`
-- `vista_delitos_combinada` (Resultado de la unión técnica).
-
----
-
-## 4. Instrucciones de Ejecución
-
-### Requisitos Previos
-
-- **PostgreSQL**: Contar con un servidor activo y la base de datos `bd_plataforma_mexico` creada.
-- **Python 3.x**: Librerías necesarias instaladas:
-  ```bash
-  pip install pandas sqlalchemy psycopg2-binary
-  ```
-
-### Pasos para Reproducir
-
-1.  **Clonar el repositorio** y asegurarse de que los archivos CSV estén en la raíz.
-2.  **Ejecutar el script principal**:
-    ```bash
-    python etl_maestro.py
-    ```
-3.  **Verificación**: Abrir pgAdmin y confirmar que las tablas se encuentran pobladas con los miles de registros.
-4.  **Conexión a Power BI**:
-    - Abrir el archivo de Power BI incluido.
-    - Configurar el origen de datos hacia la base de datos local de PostgreSQL.
-
----
-
-## 5. Visualización y KPIs (Power BI)
-
-El dashboard final presenta cuatro formatos de gráficas esenciales para la toma de decisiones:
-
-1.  **Tendencia Temporal (Gráfico de Líneas)**: Comparativa de delitos diarios entre ambas bases de datos unidas.
-2.  **Distribución Geográfica (Mapa)**: Localización de delitos por Entidad Federativa.
-3.  **Categorización de Delitos (Gráfico de Anillos)**: Desglose porcentual de la incidencia según la Fiscalía.
-4.  **Indicadores de Volumen (Tarjetas)**: Conteo total de registros para validar la escala masiva del proyecto (>200k datos).
-
----
-
----
-
-**Fecha de Entrega:** Lunes, 27 de Abril de 2026.
-**Institución:** Instituto Tecnológico de Oaxaca (ITO).
+En la etapa de transformación mediante código, se aplicó un diccionario de equivalencias (Mapeo) para convertir los IDs numéricos del INEGI a los nombres oficiales de los 32 estados de la República en formato texto. Adicionalmente, se concatenaron y formatearon las columnas temporales para generar un formato estándar ISO 8601 (`YYYY-MM-DD`).
+Una vez homologadas ambas llaves de cruce (`fecha` y `estado`), se realizó un `INNER JOIN` para obtener el conteo consolidado de emergencias por zona geográfica.
