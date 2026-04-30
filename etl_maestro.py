@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 
 # --- 1. CONFIGURACIÓN DE BASE DE DATOS ---
 USUARIO = "postgres"
-CONTRASENA = "TuContrasena" # Tu contraseña real
+CONTRASENA = "Max22161097" # Tu contraseña real
 HOST = "127.0.0.1"
 PUERTO = "5432"
 BASE_DATOS = "bd_emergencias_nacional" # Nombre de la base en pg admin o mysql

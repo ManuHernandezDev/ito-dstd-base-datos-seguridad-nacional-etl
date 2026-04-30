@@ -50,3 +50,8 @@ El principal reto de la transformación fue lograr el cruce (JOIN) entre la base
 
 En la etapa de transformación mediante código, se aplicó un diccionario de equivalencias (Mapeo) para convertir los IDs numéricos del INEGI a los nombres oficiales de los 32 estados de la República en formato texto. Adicionalmente, se concatenaron y formatearon las columnas temporales para generar un formato estándar ISO 8601 (`YYYY-MM-DD`).
 Una vez homologadas ambas llaves de cruce (`fecha` y `estado`), se realizó un `INNER JOIN` para obtener el conteo consolidado de emergencias por zona geográfica.
+
+**Objetivo General del Proyecto**
+El propósito de este trabajo es unir dos grandes fuentes de información nacional: el registro de delitos y el registro de accidentes de tránsito (viales). Al juntar estos datos, queremos crear una herramienta que permita ver, en un solo lugar, qué estados de México tienen más emergencias al mismo tiempo.
+
+Esto sirve para que las autoridades puedan tomar mejores decisiones, como saber dónde hace falta enviar más patrullas o ambulancias, identificando los días y las horas donde el sistema 911 suele saturarse debido a la combinación de choques y actos delictivos.
