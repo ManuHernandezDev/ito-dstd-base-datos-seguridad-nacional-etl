@@ -33,10 +33,10 @@ El objetivo es suministrar un datamart consolidado a herramientas de Business In
 1. Clonar este repositorio en su máquina local.
 2. Asegurarse de tener en la raíz los archivos originales (`datos_delictivos_no_normalizados.csv` y `atus_anual_2024.csv`).
 3. Crear una base de datos vacía en pgAdmin llamada `bd_emergencias_nacional`.
-4. Abrir `etl_emergencias.py`, modificar las credenciales de conexión (`USUARIO` y `CONTRASENA`) según su configuración local.
+4. Abrir `etl_maestro.py`, modificar las credenciales de conexión (`USUARIO` y `CONTRASENA`) según su configuración local.
 5. Ejecutar el script:
    ```bash
-   python etl_emergencias.py
+   python etl_maestro.py
    ```
 6. El script realizará la transformación de catálogos INEGI, ejecutará el cruce y creará la tabla `emergencias_nacionales_consolidado` en PostgreSQL. Además, generará el archivo físico `base_emergencias_limpia.csv` para uso en la fase de visualización.
 
