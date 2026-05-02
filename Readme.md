@@ -8,8 +8,8 @@ Este documento detalla el proceso técnico para la implementación del flujo **E
    Integrantes:
 - Candelaria Velazquez Rodriguez.
 - Diego García Jennifer.
-- García Gallegos Eric
 - Elorza Perez Joaquín Baruc
+- García Gallegos Eric
 - Martínez Mendoza Jesús Angel
 - Hernández Soriano Manuel
 ```
