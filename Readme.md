@@ -529,7 +529,7 @@ ORDER BY gran_total_emergencias DESC;
 
 ---
 
-## 📈 Visualización en Power BI
+## Visualización en Power BI
 
 El archivo [`graficas_1.pbix`](./graficas_1.pbix) contiene el dashboard interactivo construido sobre el datamart generado. La versión exportada en PDF está disponible en [`graficas_1.pdf`](./graficas_1.pdf).
 
