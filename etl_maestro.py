@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import os
 
 # --- 1. CONFIGURACIÓN DE BASE DE DATOS ---
 USUARIO = "postgres"
@@ -24,48 +25,76 @@ def ejecutar_etl():
     print("Iniciando Extracción de Datos...")
     
     # --- 2. EXTRACCIÓN ---
-    # Leer base de Delitos
-    df_delitos = pd.read_csv('datos_delictivos_no_normalizados.csv', encoding='utf-8')
+    # Leer base histórica de Delitos (Contiene 2020 a 2025)
+    print("Cargando base masiva de delitos...")
+    df_delitos = pd.read_csv('datos_delictivos_no_normalizados.csv', encoding='utf-8', low_memory=False)
     
-    # Leer base de Accidentes ATUS
-    df_atus = pd.read_csv('atus_anual_2024.csv', encoding='latin-1')
+    # Leer e integrar múltiples bases de Accidentes ATUS (2020 a 2025)
+    anios_atus = [2020, 2021, 2022, 2023, 2024, 2025]
+    lista_df_atus = []
+    
+    for anio in anios_atus:
+        nombre_archivo = f'atus_anual_{anio}.csv'
+        if os.path.exists(nombre_archivo):
+            print(f"Encontrado y cargando: {nombre_archivo}...")
+            df_temp = pd.read_csv(nombre_archivo, encoding='latin-1', low_memory=False)
+            lista_df_atus.append(df_temp)
+        else:
+            print(f"Advertencia: El archivo {nombre_archivo} no se encontró en la carpeta. Se omitirá.")
+            
+    if not lista_df_atus:
+        print("ERROR CRÍTICO: No se encontró ningún archivo ATUS para procesar.")
+        return
+        
+    # Unir todos los años de ATUS en un solo DataFrame masivo
+    df_atus = pd.concat(lista_df_atus, ignore_index=True)
+    print(f"Consolidación ATUS terminada. Total de registros viales: {len(df_atus)}")
     
     print("Iniciando Transformación y Limpieza...")
+    print("Iniciando Transformación y Limpieza...")
     # --- 3. TRANSFORMACIÓN DE ATUS ---
-    # Limpiar columnas con caracteres raros y crear columna de fecha YYYY-MM-DD
     df_atus.columns = df_atus.columns.str.strip()
     df_atus['ID_ENTIDAD'] = df_atus['ID_ENTIDAD'].astype(str).str.replace('\t', '').astype(int)
     
-    # Crear columna fecha en ATUS uniendo ANIO, MES y DIA
-    df_atus['fecha'] = pd.to_datetime(dict(year=df_atus.ANIO, month=df_atus.MES, day=df_atus.ID_DIA)).dt.strftime('%Y-%m-%d')
+    # ---------------------------------------------------------
+    # NUEVO: FORZAR A NÚMERO (Limpia textos raros de años viejos)
+    # ---------------------------------------------------------
+    df_atus['ID_DIA'] = pd.to_numeric(df_atus['ID_DIA'], errors='coerce')
+    df_atus['MES'] = pd.to_numeric(df_atus['MES'], errors='coerce')
+    df_atus['ANIO'] = pd.to_numeric(df_atus['ANIO'], errors='coerce')
     
-    # Aplicar Regla de Negocio: Mapeo de Estados
+    # VACUNA INEGI: Filtrar registros válidos (descarta los NaN creados arriba y los días 99)
+    df_atus = df_atus[(df_atus['ID_DIA'] <= 31) & (df_atus['MES'] <= 12)]
+    
+    # Crear columna fecha manejando errores (coerce convierte fechas inválidas en NaT)
+    df_atus['fecha'] = pd.to_datetime(
+        dict(year=df_atus.ANIO, month=df_atus.MES, day=df_atus.ID_DIA), 
+        errors='coerce'
+    )
+    # Tirar los registros que no pudieron convertirse a fecha válida y dar formato
+    df_atus = df_atus.dropna(subset=['fecha'])
+    df_atus['fecha'] = df_atus['fecha'].dt.strftime('%Y-%m-%d')
+    
+    # Mapeo de Estados
     df_atus['estado'] = df_atus['ID_ENTIDAD'].map(diccionario_estados)
     
     # --- 4. AGRUPACIÓN Y CRUCE (JOIN) ---
-    print("Cruzando bases de datos por Estado y Fecha...")
-    # Contar delitos por día y estado
+    print("Agrupando y cruzando bases de datos por Estado y Fecha...")
     delitos_agrupados = df_delitos.groupby(['fecha', 'estado']).size().reset_index(name='total_delitos')
-    
-    # Contar accidentes por día y estado
     accidentes_agrupados = df_atus.groupby(['fecha', 'estado']).size().reset_index(name='total_accidentes')
     
-    # INNER JOIN: Dejar solo donde hay registros de ambos el mismo día
     df_final = pd.merge(delitos_agrupados, accidentes_agrupados, on=['fecha', 'estado'], how='inner')
-    
-    # Calcular métrica sumada para el Dashboard
     df_final['total_emergencias'] = df_final['total_delitos'] + df_final['total_accidentes']
     
     # --- 5. CARGA ---
-    print("Cargando a la Base de Datos PostgreSQL...")
+    print(f"Cargando {len(df_final)} registros históricos a PostgreSQL...")
     engine = create_engine(f"postgresql://{USUARIO}:{CONTRASENA}@{HOST}:{PUERTO}/{BASE_DATOS}")
     
-    # Subir la tabla combinada a SQL
+    # if_exists='replace' borrará tu tabla actual de 2024 y la recreará con todo el histórico 2020-2025
     df_final.to_sql('emergencias_nacionales_consolidado', engine, if_exists='replace', index=False)
     
-    # Exportar a CSV para que Baru haga el Dashboard
     df_final.to_csv('base_emergencias_limpia.csv', index=False, encoding='utf-8')
-    print("¡Éxito! Base de datos creada y archivo base_emergencias_limpia.csv generado.")
+    print("¡Éxito total! Datamart histórico creado y archivo base_emergencias_limpia.csv actualizado.")
 
 if __name__ == "__main__":
     ejecutar_etl()
