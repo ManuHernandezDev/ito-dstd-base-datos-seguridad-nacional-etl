@@ -31,7 +31,7 @@ El Sistema de Soporte a Decisiones (DSS) es una plataforma de Inteligencia de Ne
 ---
 
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 1. [Descripción del Proyecto](#-descripción-del-proyecto)
 2. [Equipo de Desarrollo](#-equipo-de-desarrollo)
@@ -50,7 +50,7 @@ El Sistema de Soporte a Decisiones (DSS) es una plataforma de Inteligencia de Ne
 
 ---
 
-## 📌 Descripción del Proyecto
+## Descripción del Proyecto
 
 Este repositorio contiene el pipeline **ETL (Extract, Transform, Load)** desarrollado en Python para la asignatura de **Bases de Datos** del Instituto Tecnológico de Oaxaca (ITO).
 
@@ -68,7 +68,7 @@ El sistema cruza dos grandes fuentes de datos públicas de México:
 
 ---
 
-## 👥 Equipo de Desarrollo
+## Equipo de Desarrollo
 
 **Equipo 4 — Ingeniería en Sistemas Computacionales**
 Instituto Tecnológico de Oaxaca · Materia: Base de Datos
@@ -84,7 +84,7 @@ Instituto Tecnológico de Oaxaca · Materia: Base de Datos
 
 ---
 
-## 🏗️ Arquitectura del Pipeline ETL
+## Arquitectura del Pipeline ETL
 
 El flujo de datos sigue las tres fases clásicas de un pipeline ETL:
 
@@ -123,9 +123,9 @@ El flujo de datos sigue las tres fases clásicas de un pipeline ETL:
 
 ---
 
-## 📂 Fuentes de Datos
+## Fuentes de Datos
 
-### 🗂️ Base Interna — Delitos
+### Base Interna — Delitos
 
 Archivo propio de incidencia delictiva generado para el proyecto. Contiene eventos delictivos históricos clasificados por **fecha** y **estado** (2020–2025).
 
@@ -134,7 +134,7 @@ datos_delictivos_no_normalizados.csv
   └── columnas clave: fecha, estado
 ```
 
-### 🗂️ Base Externa — ATUS (INEGI)
+### Base Externa — ATUS (INEGI)
 
 Registros oficiales de accidentes de tránsito en zonas urbanas y suburbanas, publicados por el **Instituto Nacional de Estadística y Geografía (INEGI)**.
 
@@ -150,37 +150,37 @@ Registros oficiales de accidentes de tránsito en zonas urbanas y suburbanas, pu
 
 ---
 
-## 📁 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```
 ito-dstd-base-datos-seguridad-nacional-etl/
 │
-├── 📄 Readme.md                          ← Este archivo
+├── Readme.md                          ← Este archivo
 │
-├── 🐍 etl_maestro.py                     ← Pipeline ETL principal (PostgreSQL)
-├── 🐍 etl_maestro_mysql.py               ← Pipeline ETL alternativo (MySQL)
+├── etl_maestro.py                     ← Pipeline ETL principal (PostgreSQL)
+├── etl_maestro_mysql.py               ← Pipeline ETL alternativo (MySQL)
 │
-├── 📊 graficas_1.pbix                    ← Dashboard Power BI
-├── 📄 graficas_1.pdf                     ← Exportación PDF del reporte BI
+├── graficas_1.pbix                    ← Dashboard Power BI
+├── graficas_1.pdf                     ← Exportación PDF del reporte BI
 │
-├── 🗄️ crear_tabla_datos.sql              ← Script DDL: crea e inserta datos de prueba
-├── 🗄️ consultas_rodrigo.sql             ← Consultas SQL de análisis
-├── 📄 Reporte de Consulta                ← Resultados documentados de las consultas
+├── crear_tabla_datos.sql              ← Script DDL: crea e inserta datos de prueba
+├── consultas_rodrigo.sql             ← Consultas SQL de análisis
+├── Reporte de Consulta                ← Resultados documentados de las consultas
 │
-├── 📦 datos_delictivos_no_normalizados.csv  ← Fuente interna de delitos
-├── 📦 base_emergencias_limpia.csv           ← OUTPUT: datamart consolidado
+├── datos_delictivos_no_normalizados.csv  ← Fuente interna de delitos
+├── base_emergencias_limpia.csv           ← OUTPUT: datamart consolidado
 │
-├── 📦 atus_anual_2020.csv               ─┐
-├── 📦 atus_anual_2021.csv               ─┤ Fuentes externas INEGI (ATUS)
-├── 📦 atus_anual_2022.csv               ─┤
-├── 📦 atus_anual_2023.csv               ─┘
+├── atus_anual_2020.csv               ─┐
+├── atus_anual_2021.csv               ─┤ Fuentes externas INEGI (ATUS)
+├── atus_anual_2022.csv               ─┤
+├── atus_anual_2023.csv               ─┘
 │
-└── ⚙️ .gitattributes                     ← Configuración Git LFS (archivos grandes)
+└── .gitattributes                     ← Configuración Git LFS (archivos grandes)
 ```
 
 ---
 
-## ⚙️ Requisitos de Entorno
+## Requisitos de Entorno
 
 ### Versión de Python
 
@@ -209,9 +209,9 @@ pip install pandas sqlalchemy pymysql
 
 ---
 
-## 🚀 Instrucciones de Ejecución
+## Instrucciones de Ejecución
 
-### 📌 Opción A — PostgreSQL (Versión Principal)
+### Opción A — PostgreSQL (Versión Principal)
 
 Ejecuta el pipeline completo que procesa todos los años del ATUS y los cruza con los registros de delitos.
 
@@ -274,7 +274,7 @@ Cargando X registros históricos a PostgreSQL...
 
 ---
 
-### 📌 Opción B — MySQL (Versión Alternativa)
+### Opción B — MySQL (Versión Alternativa)
 
 Esta versión carga la base de delitos interna junto con una fuente externa (carpetas FGJ) y las inserta en una base MySQL.
 
@@ -319,7 +319,7 @@ python etl_maestro_mysql.py
 
 ---
 
-## 🔧 Reglas de Negocio y Transformaciones
+## Reglas de Negocio y Transformaciones
 
 El principal reto técnico fue homologar dos bases de datos con **formatos completamente diferentes**. Las transformaciones aplicadas fueron:
 
@@ -366,7 +366,7 @@ Ambas fuentes se agrupan por `[fecha, estado]` y se cruzan mediante un `INNER JO
 
 ---
 
-## 🗄️ Esquema de la Base de Datos
+## Esquema de la Base de Datos
 
 La tabla principal generada por el ETL es `emergencias_nacionales_consolidado`:
 
@@ -397,7 +397,7 @@ CREATE INDEX idx_fecha  ON emergencias_nacionales_consolidado(fecha);
 
 ---
 
-## 📊 Análisis SQL y Resultados
+## Análisis SQL y Resultados
 
 Una vez cargado el datamart, se ejecutan consultas analíticas para extraer inteligencia de negocio.
 
@@ -424,9 +424,9 @@ LIMIT 10;
 
 | # | Estado | Emergencias Totales | Total Delitos | Total Accidentes |
 |:-:|--------|:-------------------:|:-------------:|:----------------:|
-| 🥇 | Ciudad de México | **927** | 576 | 351 |
-| 🥈 | Estado de México | **831** | 538 | 293 |
-| 🥉 | Jalisco | **674** | 409 | 265 |
+| 1 | Ciudad de México | **927** | 576 | 351 |
+| 2 | Estado de México | **831** | 538 | 293 |
+| 3 | Jalisco | **674** | 409 | 265 |
 | 4 | Nuevo León | **596** | 366 | 230 |
 | 5 | Guanajuato | **499** | 318 | 181 |
 | 6 | Chihuahua | **488** | 298 | 190 |
@@ -535,28 +535,28 @@ El archivo [`graficas_1.pbix`](./graficas_1.pbix) contiene el dashboard interact
 
 El reporte incluye:
 
-- 📊 Mapa coroplético de México con intensidad de emergencias por estado
-- 📈 Gráfica de tendencia mensual (Enero–Abril 2024)
-- 🔢 Tarjetas KPI: total nacional de delitos, accidentes y emergencias
-- 📋 Tabla comparativa Top 10 estados críticos
+- Mapa coroplético de México con intensidad de emergencias por estado
+- Gráfica de tendencia mensual (Enero–Abril 2024)
+- Tarjetas KPI: total nacional de delitos, accidentes y emergencias
+- Tabla comparativa Top 10 estados críticos
 
 > [!TIP]
 > Para abrir el `.pbix`, asegúrate de tener instalado **Power BI Desktop** (versión gratuita disponible en [powerbi.microsoft.com](https://powerbi.microsoft.com/)). Actualiza la fuente de datos apuntando al archivo `base_emergencias_limpia.csv` local.
 
 ---
 
-## 📌 Resultados Ejecutivos
+## Resultados Ejecutivos
 
 | Métrica | Valor |
 |---------|-------|
-| 📅 Periodo analizado | Enero – Abril 2024 |
-| 📍 Estados analizados | 32 |
-| 📦 Total de registros en el datamart | 128 |
-| 🔴 Estado con más emergencias | Ciudad de México (**927**) |
-| 🟢 Estado con menos emergencias | Baja California Sur (**89**) |
-| 🚔 Total nacional de delitos | **3,814** |
-| 🚗 Total nacional de accidentes | **2,247** |
-| 🚨 **Total nacional de emergencias** | **6,061** |
+| Periodo analizado | Enero – Abril 2024 |
+| Estados analizados | 32 |
+| Total de registros en el datamart | 128 |
+| Estado con más emergencias | Ciudad de México (**927**) |
+| Estado con menos emergencias | Baja California Sur (**89**) |
+| Total nacional de delitos | **3,814** |
+| Total nacional de accidentes | **2,247** |
+| **Total nacional de emergencias** | **6,061** |
 
 ---
 
